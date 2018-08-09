@@ -1,13 +1,13 @@
 <template>
   <div id="app">
-    <hearder-tag></hearder-tag>
-    <body-tag></body-tag>
+   <lottert></lottert>
+   <winning-list></winning-list>
   </div>
 </template>
 
 <script>
-import hearderTag from "./header/header"
-import bodyTag from "./body/body"
+import lottert from "./lottery/lottery"
+import winningList from "./winningList/winning_list"
 export default {
   name: 'app',
   data () {
@@ -16,8 +16,8 @@ export default {
     }
   },
   components:{
-    hearderTag,
-    bodyTag
+    lottert,
+    winningList
   }
 }
 </script>

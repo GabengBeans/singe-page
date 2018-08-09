@@ -1,0 +1,56 @@
+<template>
+    <div class="list-wrap">
+        <div class="winning-list">
+
+        </div>
+        <div>
+            <div class="lottery-rules-header"></div>
+            <div class="lottery-rules-text">
+                1、每位用户每天登录APP有3次抽奖机会，分享到微信好友或朋友圈可额外获得1次机会；<br>
+
+                2、若用户中得实物奖品和现金红包，流星狗客服将在1-3个工作日与该用户联系兑奖事宜；<br>
+
+                3、请中奖用户向客服提供姓名、地址、手机号等信息；<br>
+
+                4、客服若7日内无法联系到中奖用户，则视为该用户自动放弃领取本次奖励；<br>
+
+                5、本次活动最终解释权归大恩德成科技(北京)有限公司所有.<br>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+export default {};
+</script>
+<style>
+@import "../../style/public.css";
+.list-wrap {
+  background-color: #ffe2b0;
+  padding-top: 30px;
+}
+.winning-list {
+  width: 663px;
+  height: 381px;
+  background: url("../../images/winning_list.png") no-repeat;
+  background-size: 100% 100%;
+  margin: 0 auto;
+  margin-bottom: 40px;
+}
+.lottery-rules-header {
+  width: 551px;
+  height: 32px;
+  background: url("../../images/lottery_rules_header.png") no-repeat;
+  background-size: 100% 100%;
+  margin: 0 auto;
+  margin-bottom: 30px;
+}
+.lottery-rules-text{
+    width: 551px;
+    margin: 0 auto;
+    font-family: 'PingFang-SC-Medium';
+    font-size: 18px;
+    color: rgb(240,10,56);
+    padding-bottom: 30px;
+}
+</style>
