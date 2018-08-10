@@ -2,6 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const fs = require('fs');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 function resolve(dir) {
   return path.join(__dirname, dir);
@@ -16,8 +17,8 @@ module.exports = {
   entry: './src/main.js',
   output: {
     path: path.resolve(__dirname, '../dist'),
-    publicPath: './', //服务器地址
-    filename: 'build.js'
+    publicPath: 'http://localhost/', //服务器地址
+    filename: '[name].[hash].js'
   },
   module: {
     rules: [{
@@ -111,6 +112,12 @@ module.exports = {
       template: './template/index.html',
       inject: 'body'
     }),
+    new CopyWebpackPlugin([
+      {
+          from: 'images',
+          to: 'images'
+      }
+  ]),
     require('autoprefixer')
   ]
 

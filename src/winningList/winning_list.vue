@@ -35,7 +35,10 @@ export default {
     };
   },
   mounted() {
-    util.get(baseUrl.list_prizes_reveive_logs_url).then(resp => {
+    let params={
+      limit:20
+    }
+    util.get(baseUrl.list_prizes_reveive_logs_url,params).then(resp => {
       if (resp.data.success) {
         let arr = resp.data.data;
         arr.map(item => {

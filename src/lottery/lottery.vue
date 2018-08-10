@@ -4,9 +4,9 @@
       <img id="shan-img" style="display:none;" />
       <img id="sorry-img" style="display:none;" />
       <div class="banner">
-        <div class="turnplate" style="background-image:url(../../images/turnplate-bg.png);background-size:100% 100%;">
+        <div class="turnplate">
           <canvas class="item" id="wheelcanvas" width="422px" height="422px"></canvas>
-          <img class="pointer" src="images/turnplate-pointer.png" @click="clickPointer" />
+          <div class="pointer" @click="clickPointer" ></div>
         </div>
         <div class="lottery-times">您今天还有
           <span class="lottery-times-span">{{lotteryTimes}}</span>
@@ -20,11 +20,10 @@
     </div>
     <div v-if="modalStatus" class="modal">
       <div class="modal-img-wrap">
-        <img class="modal-img" :src="imgUrl" />
+        <div class="modal-img" :style="{backgroundImage:'url('+imgUrl+')'}" ></div>
         <div class="prizesName-style" v-if="prizesType==2">{{prizesName}}</div>
       </div>
       <img class="modal-img-btn" src="../../images/modal_btn.png" @click="modalStatus=false" />
-
     </div>
   </div>
 </template>
@@ -53,7 +52,7 @@ export default {
       isiOS:"",
       title:"标题",
       desc:"描述描述描述描述描述描述描述描述描述描述描述描述描述",
-      imgUrl:"https://dedc-statics.oss-cn-beijing.aliyuncs.com/images/service/3/F/2AC10A09-E1CE-4E98-A826-E3C0B7E111C7.jpg"
+      httpImgUrl:"https://dedc-statics.oss-cn-beijing.aliyuncs.com/images/service/3/F/2AC10A09-E1CE-4E98-A826-E3C0B7E111C7.jpg"
     };
   },
   created() {
@@ -348,10 +347,10 @@ export default {
     },
     sharePage(){
       if(isAndroid){
-        android.sharePage(this.title,this.desc,this.imgUrl)
+        android.sharePage(this.title,this.desc,this.httpImgUrl)
       }
       if(isiOS){
-        window.webkit.messageHandlers.sharePage.postMessage({title:this.title,desc:this.desc,imgUrl:this.imgurl})
+        window.webkit.messageHandlers.sharePage.postMessage({title:this.title,desc:this.desc,imgUrl:this.httpImgUrl})
       }
     }
   }
@@ -384,16 +383,20 @@ export default {
   height: 600px;
   position: relative;
   margin-bottom: 10px;
+  background:url('../../images/turnplate-bg.png');
+  background-size:100% 100%;
 }
 .item {
   width: 100%;
 }
-.banner .turnplate img.pointer {
+.banner .turnplate .pointer {
   position: absolute;
   width: 31.5%;
   height: 42.5%;
   left: 34.6%;
   top: 23%;
+  background: url('../../images/turnplate-pointer.png');
+  background-size: 100% 100%;
 }
 .lottery-times {
   text-align: center;
@@ -447,7 +450,9 @@ export default {
 .modal-img {
   width: 610px;
   height: 530px;
+  background-size: 100% 100%;
 }
+
 .modal-img-btn {
   width: 244px;
   height: 82px;
