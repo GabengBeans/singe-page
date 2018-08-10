@@ -9,13 +9,14 @@
           <img class="pointer" src="images/turnplate-pointer.png" @click="clickPointer" />
         </div>
         <div class="lottery-times">您今天还有
-          <span class="lottery-times-span">{{lotteryTimes}}</span>次抽奖机会
+          <span class="lottery-times-span">{{lotteryTimes}}</span>
+          次抽奖机会
         </div>
       </div>
     </div>
     <div class="btn-wrap">
-      <div class="winning-record-btn"></div>
-      <div class="share-btn"></div>
+      <div class="winning-record-btn" @click="enterApp"></div>
+      <div class="share-btn" @click="sharePage"></div>
     </div>
     <div v-if="modalStatus" class="modal">
       <div class="modal-img-wrap">
@@ -43,17 +44,23 @@ export default {
         bRotate: false //false:停止;ture:旋转
       },
       lotteryTimes: 0,
-      screenHeight: "",
-      screenWidth: "",
       modalStatus: false,
       imgUrl: "../../images/meteor_drill.png",
       prizesType: 2,
-      prizesName: "流星钻0.1克拉"
+      prizesName: "流星钻0.1克拉",
+      navigatorUserAgent:"",
+      isAndroid:"",
+      isiOS:"",
+      title:"标题",
+      desc:"描述描述描述描述描述描述描述描述描述描述描述描述描述",
+      imgUrl:"https://dedc-statics.oss-cn-beijing.aliyuncs.com/images/service/3/F/2AC10A09-E1CE-4E98-A826-E3C0B7E111C7.jpg"
     };
   },
   created() {
-    this.screenWidth = window.screen.width;
-    this.screenHeight = window.screen.height;
+    this.navigatorUserAgent = navigator.userAgent
+    this.isAndroid = this.navigatorUserAgent.indexOf("Android")>-1 || this.navigatorUserAgent.indexOf("Adr")>-1
+    this.isiOS = !!this.navigatorUserAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/)
+    window.sessionStorage.setItem('isAndroid',this.isAndroid)
   },
   mounted() {
     util.get(baseUrl.list_prizes_url).then(resp => {
@@ -75,7 +82,10 @@ export default {
       { startColor: "#F00A38", endColor: "#FC5576" },
       { startColor: "#FFF5A1", endColor: "#FFF5A1" },
       { startColor: "#F00A38", endColor: "#FC5576" },
-      { startColor: "#FFF5A1", endColor: "#FFF5A1" }
+      { startColor: "#FFF5A1", endColor: "#FFF5A1" },
+      { startColor: "#F00A38", endColor: "#FC5576" },
+      { startColor: "#FFF5A1", endColor: "#FFF5A1" },
+      { startColor: "#F00A38", endColor: "#FC5576" }
     ];
   },
   methods: {
@@ -104,8 +114,6 @@ export default {
           var grd = ctx.createLinearGradient(startX, startY, endX, endY);
           var startColor = this.turnplate.colors[i].startColor;
           var endColor = this.turnplate.colors[i].endColor;
-          console.log(startColor)
-          console.log(endColor)
           grd.addColorStop(0, startColor);
           grd.addColorStop(1, endColor);
           ctx.fillStyle = grd;
@@ -329,6 +337,22 @@ export default {
           }
         }
       });
+    },
+    enterApp(){
+      if(isAndroid){
+        android.enterApp()
+      }
+      if(isiOS){
+        window.webkit.messageHandlers.enterApp.postMessage({})
+      }
+    },
+    sharePage(){
+      if(isAndroid){
+        android.sharePage(this.title,this.desc,this.imgUrl)
+      }
+      if(isiOS){
+        window.webkit.messageHandlers.sharePage.postMessage({title:this.title,desc:this.desc,imgUrl:this.imgurl})
+      }
     }
   }
 };
