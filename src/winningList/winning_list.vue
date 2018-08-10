@@ -1,7 +1,11 @@
 <template>
     <div class="list-wrap">
         <div class="winning-list">
-
+            <div class="winning-list-text">
+                <ul class="winning-list-ul">
+                    <li v-for=" item in  winningListLogs" :key="item.index">恭喜 {{item.phone}} 刚刚获得 {{item.prizesName}}</li>
+                </ul>
+            </div>
         </div>
         <div>
             <div class="lottery-rules-header"></div>
@@ -21,7 +25,43 @@
 </template>
 
 <script>
-export default {};
+import baseUrl from "../../libs/baseUrl"
+import util from "../../libs/util"
+export default {
+    data(){
+        return {
+            winningListLogs:[],
+            rollingStatus:''
+      }
+    },
+    mounted(){
+        util.get(baseUrl.list_prizes_reveive_logs_url).then(resp=>{
+            if(resp.data.success){
+                let arr = resp.data.data
+                arr.map(item=>{
+                    let strArr = Array.from(item.phone)
+                   strArr.splice(3,4,"****")
+                   item.phone = strArr.join('')
+                })
+                arr = arr.concat(arr)
+                this.winningListLogs = arr
+                 let val = 0
+                clearInterval(this.rollingStatus)
+                let that = this
+                this.rollingStatus = setInterval(function(){
+                     let length = that.winningListLogs.length
+                    if(Math.abs(val)>length/2*50){
+                       val = 0
+                    }
+                    $(".winning-list-ul").css("top",val-- + "px")
+                },17)
+            }else{
+                console.log(resp.data.msg)
+            }
+        })
+        
+    }
+};
 </script>
 <style>
 @import "../../style/public.css";
@@ -36,6 +76,26 @@ export default {};
   background-size: 100% 100%;
   margin: 0 auto;
   margin-bottom: 40px;
+  box-sizing: border-box;
+  padding-top:120px;
+  padding-bottom: 60px;
+}
+.winning-list-text{
+    width: 663px;
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+}
+.winning-list-ul{
+     width: 663px;
+    height: 200px;
+    text-align: center;
+    line-height: 50px;
+    font-family: PingFang-SC-Mediim;
+    font-size: 24px;
+    color: rgb(240,10,56);
+    position:absolute;
+    top:0;
 }
 .lottery-rules-header {
   width: 551px;

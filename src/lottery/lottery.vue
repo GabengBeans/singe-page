@@ -14,14 +14,22 @@
       </div>
     </div>
     <div class="btn-wrap">
-        <div class="winning-record-btn"></div>
-        <div class="share-btn"></div>
+      <div class="winning-record-btn"></div>
+      <div class="share-btn"></div>
+    </div>
+    <div v-if="modalStatus" class="modal">
+      <div class="modal-img-wrap">
+        <img class="modal-img" :src="imgUrl" />
+        <div class="prizesName-style" v-if="prizesType==2">{{prizesName}}</div>
       </div>
+      <img class="modal-img-btn" src="../../images/modal_btn.png" @click="modalStatus=false" />
+
+    </div>
   </div>
 </template>
 <script>
-import baseUrl from "../../libs/baseUrl"
-import util from "../../libs/util"
+import baseUrl from "../../libs/baseUrl";
+import util from "../../libs/util";
 export default {
   data() {
     return {
@@ -34,32 +42,30 @@ export default {
         startAngle: 0, //开始角度
         bRotate: false //false:停止;ture:旋转
       },
-      lotteryTimes:0
+      lotteryTimes: 0,
+      screenHeight: "",
+      screenWidth: "",
+      modalStatus: false,
+      imgUrl: "../../images/meteor_drill.png",
+      prizesType: 2,
+      prizesName: "流星钻0.1克拉"
     };
   },
- 
+  created() {
+    this.screenWidth = window.screen.width;
+    this.screenHeight = window.screen.height;
+  },
   mounted() {
-    util.get(baseUrl.list_prizes_url).then(resp=>{
-        if(resp.data.success){
-         resp.data.data.map(item=>{
-           this.turnplate.restaraunts.push(item)
-         })
-         console.log(this.turnplate.restaraunts)
-         this.drawRouletteWheel();
-        }else{
-          console.log(resp.data.msg)
-        }
-    })
-    // this.turnplate.restaraunts = [
-    //   "流星钻0.1克拉",
-    //   "流星钻0.3克拉",
-    //   "流星钻0.5克拉",
-    //   "流星钻1克拉",
-    //   "现金50元",
-    //   "现金100元",
-    //   "谢谢参与",
-    //   "iphonex1部"
-    // ];
+    util.get(baseUrl.list_prizes_url).then(resp => {
+      if (resp.data.success) {
+        resp.data.data.map(item => {
+          this.turnplate.restaraunts.push(item);
+        });
+        this.drawRouletteWheel();
+      } else {
+        console.log(resp.data.msg);
+      }
+    });
     this.turnplate.colors = [
       { startColor: "#FFF5A1", endColor: "#FFF5A1" },
       { startColor: "#F00A38", endColor: "#FC5576" },
@@ -68,9 +74,9 @@ export default {
       { startColor: "#FFF5A1", endColor: "#FFF5A1" },
       { startColor: "#F00A38", endColor: "#FC5576" },
       { startColor: "#FFF5A1", endColor: "#FFF5A1" },
-      { startColor: "#F00A38", endColor: "#FC5576" }
+      { startColor: "#F00A38", endColor: "#FC5576" },
+      { startColor: "#FFF5A1", endColor: "#FFF5A1" }
     ];
-    
   },
   methods: {
     drawRouletteWheel() {
@@ -98,6 +104,8 @@ export default {
           var grd = ctx.createLinearGradient(startX, startY, endX, endY);
           var startColor = this.turnplate.colors[i].startColor;
           var endColor = this.turnplate.colors[i].endColor;
+          console.log(startColor)
+          console.log(endColor)
           grd.addColorStop(0, startColor);
           grd.addColorStop(1, endColor);
           ctx.fillStyle = grd;
@@ -130,7 +138,7 @@ export default {
           } else {
             ctx.fillStyle = "#F00A38";
           }
-          var text = this.turnplate.restaraunts[i].prizesName
+          var text = this.turnplate.restaraunts[i].prizesName;
           var line_height = 45;
           //translate方法重新映射画布上的 (0,0) 位置
           ctx.translate(
@@ -225,20 +233,20 @@ export default {
             ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
           }
 
-          //添加对应图标
-          if (text.indexOf("闪币") > 0) {
-            var img = document.getElementById("shan-img");
-            img.onload = function() {
-              ctx.drawImage(img, -15, 10);
-            };
-            ctx.drawImage(img, -15, 10);
-          } else if (text.indexOf("谢谢参与") >= 0) {
-            var img = document.getElementById("sorry-img");
-            img.onload = function() {
-              ctx.drawImage(img, -15, 10);
-            };
-            ctx.drawImage(img, -15, 10);
-          }
+          // //添加对应图标
+          // if (text.indexOf("闪币") > 0) {
+          //   var img = document.getElementById("shan-img");
+          //   img.onload = function() {
+          //     ctx.drawImage(img, -15, 10);
+          //   };
+          //   ctx.drawImage(img, -15, 10);
+          // } else if (text.indexOf("谢谢参与") >= 0) {
+          //   var img = document.getElementById("sorry-img");
+          //   img.onload = function() {
+          //     ctx.drawImage(img, -15, 10);
+          //   };
+          //   ctx.drawImage(img, -15, 10);
+          // }
           //把当前画布返回（调整）到上一个save()状态之前
           ctx.restore();
           //----绘制奖品结束----
@@ -249,28 +257,27 @@ export default {
       if (this.turnplate.bRotate) return;
       this.turnplate.bRotate = !this.turnplate.bRotate;
       //获取随机数(奖品个数范围内
-      util.get(baseUrl.draw_prizes_url).then(resp=>{
-        if(resp.data.success){
-          let id = resp.data.data.id
-          let tempIndex
-          this.turnplate.restaraunts.map((item,index)=>{
-              if(item.id==id){
-                tempIndex=index
-              }
-          })
-          let item = tempIndex+1;
-          util.get(baseUrl.get_prizes_count_url).then(resp=>{
-            if(resp.data.success){
-              this.lotteryTimes = resp.data.data.count
+      util.get(baseUrl.draw_prizes_url).then(resp => {
+        if (resp.data.success) {
+          let id = resp.data.data.id;
+          let tempIndex;
+          this.turnplate.restaraunts.map((item, index) => {
+            if (item.id == id) {
+              tempIndex = index;
+            }
+          });
+          let item = tempIndex + 1;
+          util.get(baseUrl.get_prizes_count_url).then(resp => {
+            if (resp.data.success) {
+              this.lotteryTimes = resp.data.data.count;
               //奖品数量等于10,指针落在对应奖品区域的中心角度[252, 216, 180, 144, 108, 72, 36, 360, 324, 288]
               this.rotateFn(item, this.turnplate.restaraunts[item - 1]);
             }
-          })
-        }else{
-          console.log(resp.msg)
+          });
+        } else {
+          console.log(resp.msg);
         }
-      })
-     
+      });
     },
     rotateTimeOut() {
       $("#wheelcanvas").rotate({
@@ -300,6 +307,26 @@ export default {
         duration: 8000,
         callback() {
           that.turnplate.bRotate = !that.turnplate.bRotate;
+          that.imgUrl = "../../images/";
+          that.prizesType = 1;
+          that.modalStatus = true;
+          if (txt.prizesType == 1) {
+            that.imgUrl = that.imgUrl + "iPhonex.png";
+          } else if (txt.prizesType == 2) {
+            that.prizesType = 2;
+            that.prizesName = txt.prizesName;
+            that.imgUrl = that.imgUrl + "meteor_drill.png";
+          } else if (txt.prizesType == 3) {
+            if (txt.prizesName.indexOf("50") != -1) {
+              that.imgUrl = that.imgUrl + "cash_50.png";
+            } else {
+              that.imgUrl = that.imgUrl + "cash_100.png";
+            }
+          } else if (txt.prizesType == 4) {
+            if (txt.prizesName.indexOf("谢谢") != -1) {
+              that.imgUrl = that.imgUrl + "thanks.png";
+            }
+          }
         }
       });
     }
@@ -308,13 +335,14 @@ export default {
 </script>
 <style>
 @import "../../style/public.css";
-.lottery-wrap{
+.lottery-wrap {
+  width: 100%;
   background-color: #ffe2b0;
 }
 .lottery {
   width: 750px;
   height: 920px;
-  display: inline-block;
+  margin: 0 auto;
   background: url("../../images/lottery_bg.png") no-repeat;
   background-size: 100% 100%;
   box-sizing: border-box;
@@ -357,10 +385,11 @@ export default {
   color: rgb(0, 0, 0);
 }
 .btn-wrap {
-  width: 100%;
+  width: 750px;
   height: 80px;
   box-sizing: border-box;
   padding: 0 60px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
 }
@@ -374,5 +403,42 @@ export default {
 .share-btn {
   background: url("../../images/share_btn.png") no-repeat;
   background-size: 100% 100%;
+}
+.modal {
+  background: rgba(0, 0, 0, 0.8);
+  position: fixed;
+  top: 0;
+  z-index: 99999;
+  width: 100vw;
+  height: 100vh;
+}
+.modal-img-wrap {
+  width: 610px;
+  height: 530px;
+  padding-top: 180px;
+  display: block;
+  margin: 0 auto;
+  position: relative;
+}
+.modal-img {
+  width: 610px;
+  height: 530px;
+}
+.modal-img-btn {
+  width: 244px;
+  height: 82px;
+  padding-top: 40px;
+  display: block;
+  margin: 0 auto;
+}
+.prizesName-style {
+  width: 100%;
+  height: 38px;
+  text-align: center;
+  color: rgb(255, 255, 255);
+  font-size: 38px;
+  line-height: 38px;
+  position: absolute;
+  top: 586px;
 }
 </style>
