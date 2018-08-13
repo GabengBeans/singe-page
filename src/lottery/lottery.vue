@@ -6,7 +6,7 @@
       <div class="banner">
         <div class="turnplate">
           <canvas class="item" id="wheelcanvas" width="422px" height="422px"></canvas>
-          <div class="pointer" @click="clickPointer" ></div>
+          <div class="pointer" @click="clickPointer"></div>
         </div>
         <div class="lottery-times">您今天还有
           <span class="lottery-times-span">{{lotteryTimes}}</span>
@@ -20,16 +20,17 @@
     </div>
     <div v-if="modalStatus" class="modal">
       <div class="modal-img-wrap">
-        <div class="modal-img" :style="{backgroundImage:'url('+imgUrl+')'}" ></div>
+        <div class="modal-img" :style="{backgroundImage:'url('+imgUrl+')'}"></div>
         <div class="prizesName-style" v-if="prizesType==2">{{prizesName}}</div>
       </div>
-      <img class="modal-img-btn" src="../../images/modal_btn.png" @click="modalStatus=false" />
+      <img class="modal-img-btn" src="../../images/modal_btn.png" @click="closeModalStatus" />
     </div>
   </div>
 </template>
 <script>
 import baseUrl from "../../libs/baseUrl";
 import util from "../../libs/util";
+import shareUrl from "./shareUrl.js";
 export default {
   data() {
     return {
@@ -47,19 +48,25 @@ export default {
       imgUrl: "../../images/meteor_drill.png",
       prizesType: 2,
       prizesName: "流星钻0.1克拉",
-      navigatorUserAgent:"",
-      isAndroid:"",
-      isiOS:"",
-      title:"标题",
-      desc:"描述描述描述描述描述描述描述描述描述描述描述描述描述",
-      httpImgUrl:"https://dedc-statics.oss-cn-beijing.aliyuncs.com/images/service/3/F/2AC10A09-E1CE-4E98-A826-E3C0B7E111C7.jpg"
+      navigatorUserAgent: "",
+      isAndroid: "",
+      isiOS: "",
+      title: "标题",
+      desc: "描述描述描述描述描述描述描述描述描述描述描述描述描述",
+      httpImgUrl:
+        "https://dedc-statics.oss-cn-beijing.aliyuncs.com/images/service/3/F/2AC10A09-E1CE-4E98-A826-E3C0B7E111C7.jpg"
     };
   },
   created() {
-    this.navigatorUserAgent = navigator.userAgent
-    this.isAndroid = this.navigatorUserAgent.indexOf("Android")>-1 || this.navigatorUserAgent.indexOf("Adr")>-1
-    this.isiOS = !!this.navigatorUserAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/)
-    window.sessionStorage.setItem('isAndroid',this.isAndroid)
+    this.navigatorUserAgent = navigator.userAgent;
+    this.isAndroid =
+      this.navigatorUserAgent.indexOf("Android") > -1 ||
+      this.navigatorUserAgent.indexOf("Adr") > -1;
+    this.isiOS = !!this.navigatorUserAgent.match(
+      /\(i[^;]+;( U;)? CPU.+Mac OS X/
+    );
+    let token = util.GetQueryString("token");
+    window.sessionStorage.setItem("token", token);
   },
   mounted() {
     util.get(baseUrl.list_prizes_url).then(resp => {
@@ -261,30 +268,35 @@ export default {
       }
     },
     clickPointer() {
-      if (this.turnplate.bRotate) return;
-      this.turnplate.bRotate = !this.turnplate.bRotate;
-      //获取随机数(奖品个数范围内
-      util.get(baseUrl.draw_prizes_url).then(resp => {
-        if (resp.data.success) {
-          let id = resp.data.data.id;
-          let tempIndex;
-          this.turnplate.restaraunts.map((item, index) => {
-            if (item.id == id) {
-              tempIndex = index;
-            }
-          });
-          let item = tempIndex + 1;
-          util.get(baseUrl.get_prizes_count_url).then(resp => {
-            if (resp.data.success) {
-              this.lotteryTimes = resp.data.data.count;
-              //奖品数量等于10,指针落在对应奖品区域的中心角度[252, 216, 180, 144, 108, 72, 36, 360, 324, 288]
-              this.rotateFn(item, this.turnplate.restaraunts[item - 1]);
-            }
-          });
-        } else {
-          console.log(resp.msg);
-        }
-      });
+      if (window.sessionStorage.getItem("token")) {
+        if (this.turnplate.bRotate) return;
+        this.turnplate.bRotate = !this.turnplate.bRotate;
+        //获取随机数(奖品个数范围内
+        util.get(baseUrl.draw_prizes_url).then(resp => {
+          if (resp.data.success) {
+            let id = resp.data.data.id;
+            let tempIndex;
+            this.turnplate.restaraunts.map((item, index) => {
+              if (item.id == id) {
+                tempIndex = index;
+              }
+            });
+            let item = tempIndex + 1;
+            util.get(baseUrl.get_prizes_count_url).then(resp => {
+              if (resp.data.success) {
+                this.lotteryTimes = resp.data.data.count;
+                //奖品数量等于10,指针落在对应奖品区域的中心角度[252, 216, 180, 144, 108, 72, 36, 360, 324, 288]
+                this.rotateFn(item, this.turnplate.restaraunts[item - 1]);
+                $("#app").css({ position: "fixed", width: "100%" });
+              }
+            });
+          } else {
+            console.log(resp.msg);
+          }
+        });
+      } else {
+        this.open()
+      }
     },
     rotateTimeOut() {
       $("#wheelcanvas").rotate({
@@ -337,20 +349,61 @@ export default {
         }
       });
     },
-    enterApp(){
-      if(isAndroid){
-        android.enterApp()
+    enterApp() {
+      if (this.isAndroid) {
+        android.enterApp();
       }
-      if(isiOS){
-        window.webkit.messageHandlers.enterApp.postMessage({})
+      if (this.isiOS) {
+        window.webkit.messageHandlers.enterApp.postMessage({});
       }
     },
-    sharePage(){
-      if(isAndroid){
-        android.sharePage(this.title,this.desc,this.httpImgUrl)
+    sharePage() {
+      if (this.isAndroid) {
+        android.sharePage(this.title, this.desc, this.httpImgUrl);
       }
-      if(isiOS){
-        window.webkit.messageHandlers.sharePage.postMessage({title:this.title,desc:this.desc,imgUrl:this.httpImgUrl})
+      if (this.isiOS) {
+        window.webkit.messageHandlers.sharePage.postMessage({
+          title: this.title,
+          desc: this.desc,
+          imgUrl: this.httpImgUrl
+        });
+      }
+    },
+    closeModalStatus() {
+      $("#app").css({ position: "initial", height: "auto" });
+      this.modalStatus = false;
+    },
+    open() {
+      if (this.isAndroid) {
+        //alert('android')
+        var loadTime = new Date();
+        var ifr = document.createElement("iframe");
+        ifr.src = shareUrl.android_url; /***打开app的协议***/
+        ifr.style.display = "none";
+        document.body.appendChild(ifr);
+        window.setTimeout(function() {
+          var outTime = new Date();
+          document.body.removeChild(ifr);
+          if (outTime - loadTime > 800) {
+            window.location.href =  shareUrl.android_download_url; /***下载app的地址***/
+          }
+        }, 1000);
+      }
+      if (this.isiOS) {
+        //alert('ios')
+        var loadTime = new Date();
+        var ifr = document.createElement("iframe");
+        ifr.src =  shareUrl.ios_url; /***打开app的协议***/
+        ifr.style.display = "none";
+        document.body.appendChild(ifr);
+        window.location.href =  shareUrl.ios_url;
+        window.setTimeout(function() {
+          var outTime = new Date();
+          document.body.removeChild(ifr);
+          if (outTime - loadTime > 800) {
+            window.location.href =  shareUrl.ios_download_url; /***下载app的地址***/
+          }
+        }, 1000);
       }
     }
   }
@@ -366,10 +419,11 @@ export default {
   width: 750px;
   height: 920px;
   margin: 0 auto;
-  background: url("../../images/lottery_bg.png") no-repeat;
+  background-image: url(../../images/lottery_bg.png);
   background-size: 100% 100%;
   box-sizing: border-box;
   padding-top: 250px;
+  display: block;
 }
 .banner {
   width: 750px;
@@ -383,8 +437,8 @@ export default {
   height: 600px;
   position: relative;
   margin-bottom: 10px;
-  background:url('../../images/turnplate-bg.png');
-  background-size:100% 100%;
+  background-image: url(../../images/turnplate-bg.png);
+  background-size: 100% 100%;
 }
 .item {
   width: 100%;
@@ -395,7 +449,7 @@ export default {
   height: 42.5%;
   left: 34.6%;
   top: 23%;
-  background: url('../../images/turnplate-pointer.png');
+  background-image: url(../../images/turnplate-pointer.png);
   background-size: 100% 100%;
 }
 .lottery-times {
@@ -424,11 +478,11 @@ export default {
 .share-btn {
   width: 284px;
   height: 80px;
-  background: url("../../images/winning_record_btn.png") no-repeat;
+  background-image: url(../../images/winning_record_btn.png);
   background-size: 100% 100%;
 }
 .share-btn {
-  background: url("../../images/share_btn.png") no-repeat;
+  background-image: url(../../images/share_btn.png);
   background-size: 100% 100%;
 }
 .modal {

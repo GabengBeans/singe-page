@@ -14,12 +14,11 @@ axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded
 // 添加请求拦截器
 axios.interceptors.request.use(function (config) {
     // 在发送请求之前做些什么
-    //if (sessionStorage.getItem('token')) {
+    if (window.sessionStorage.getItem('token')) {
         config.headers = {
-            //'token': sessionStorage.getItem('token')
-            'token': "eyJhbGciOiJIUzUxMiJ9.eyIwIjozNzMsIjEiOjE1MzM4MTExODY1NTEsIjIiOm51bGwsIjMiOiJ2MSIsIjQiOiI2MzQwIiwiZXhwIjoxNTM2NDAzMTg2fQ.1Y0n0_snMzm9ZTgVn4dDtvTo_LbawbY6ykTQ0e4rcsm5TlSyUhDUnQID2jr3cgAkolFC92ZZHuQ09oS2jtHihA"
+            'token': sessionStorage.getItem('token')
         }
-    //}
+    }
     return config
 }, function (error) {
     // 对请求错误做些什么
@@ -81,6 +80,12 @@ config.get = function (url, params = {}) {
             vm.$Message.error("请求错误")
         })
     })
+}
+config.GetQueryString = function(name)
+{
+     var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+     var r = window.location.search.substr(1).match(reg);
+     if(r!=null)return  unescape(r[2]); return null;
 }
 
 export default config

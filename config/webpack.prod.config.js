@@ -17,7 +17,7 @@ module.exports = {
   entry: './src/main.js',
   output: {
     path: path.resolve(__dirname, '../dist'),
-    publicPath: 'http://localhost/', //服务器地址
+    publicPath: 'http://192.168.100.167/', //服务器地址
     filename: '[name].[hash].js'
   },
   module: {
